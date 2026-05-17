@@ -632,7 +632,7 @@ async function fetchData() {
   
   try {
     const base = getBaseUrl();
-    const limit = 60;
+    const limit = 400;
     
     // Fetch klines
     const endpoint = currentMode === 'futures' 
@@ -814,6 +814,19 @@ function updateMAUI(ma5, ma10, ma20, ma60, closes) {
 
 function updatePiCycleUI(ma111, ma350) {
   const grid = document.getElementById('piGrid');
+  
+  // Handle insufficient data
+  if (!ma111 || !ma350 || isNaN(ma111) || isNaN(ma350) || ma350 === 0) {
+    grid.innerHTML = `
+      <div class="pi-box" style="grid-column: 1 / -1;">
+        <div class="pi-label" style="color:#8b949e;">Pi Cycle Top</div>
+        <div class="pi-value" style="color:#8b949e;">需要更多歷史數據</div>
+        <div class="pi-sub">至少需要 350 日 K 線數據</div>
+      </div>
+    `;
+    return;
+  }
+  
   const gap = ((ma111 - ma350 * 2) / (ma350 * 2)) * 100;
   const signal = ma111 < ma350 * 2 ? '無頂部訊號' : '★ 頂部警告';
   
