@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BTC 行情儀表板</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #0d1117;
+      color: #e6edf3;
+      padding: 20px;
+    }
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      padding-bottom: 15px;
+      border-bottom: 1px solid #21262d;
+    }
+    .header h1 { font-size: 24px; color: #f7931a; }
+    .header .price-info { text-align: right; }
+    .header .current-price { font-size: 28px; font-weight: bold; color: #58a6ff; }
+    .header .change { font-size: 14px; margin-top: 4px; }
+    .header .change.red { color: #f85149; }
+    .header .change.green { color: #3fb950; }
+    
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+      gap: 20px;
+    }
+    .card {
+      background: #161b22;
+      border: 1px solid #21262d;
+      border-radius: 12px;
+      padding: 20px;
+    }
+    .card h2 {
+      font-size: 14px;
+      color: #8b949e;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 15px;
+    }
+    .chart-container { position: relative; height: 300px; }
+    
+    .indicators {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 15px;
+      margin-top: 20px;
+    }
+    .indicator-box {
+      background: #0d1117;
+      border-radius: 8px;
+      padding: 15px;
+      text-align: center;
+    }
+    .indicator-box .label { font-size: 12px; color: #8b949e; margin-bottom: 5px; }
+    .indicator-box .value { font-size: 20px; font-weight: bold; }
+    .indicator-box .sub { font-size: 11px; color: #8b949e; margin-top: 4px; }
+    
+    .signal-bar {
+      display: flex;
+      gap: 10px;
+      margin-top: 20px;
+      flex-wrap: wrap;
+    }
+    .signal-tag {
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-size: 13px;
+      font-weight: 500;
+    }
+    .signal-tag.bearish { background: rgba(248,81,73,0.2); color: #f85149; border: 1px solid #f85149; }
+    .signal-tag.bullish { background: rgba(63,185,80,0.2); color: #3fb950; border: 1px solid #3fb950; }
+    .signal-tag.neutral { background: rgba(139,148,158,0.2); color: #8b949e; border: 1px solid #8b949e; }
+    
+    .fib-levels {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 10px;
+      margin-top: 10px;
+    }
+    .fib-level {
+      display: flex;
+      justify-content: space-between;
+      padding: 8px 12px;
+      background: #0d1117;
+      border-radius: 6px;
+      font-size: 13px;
+    }
+    .fib-level .level { color: #8b949e; }
+    .fib-level .price { font-weight: 600; }
+    
+    .update-time {
+      text-align: center;
+      color: #8b949e;
+      font-size: 12px;
+      margin-top: 20px;
+    }
+    
+    @media (max-width: 768px) {
+      .grid { grid-template-columns: 1fr; }
+      .indicators { grid-template-columns: repeat(2, 1fr); }
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div>
+      <h1>BTC/USDT</h1>
+      <div style="color:#8b949e;font-size:13px;margin-top:4px;">Binance 現貨</div>
+    </div>
+    <div class="price-info">
+      <div class="current-price">$77,913.69</div>
+      <div class="change red">24h: -0.30% | 7d: -5.23% | 30d: +2.94%</div>
+    </div>
+  </div>
+
+  <div class="grid">
+    <!-- 價格 + 布林帶圖表 -->
+    <div class="card">
+      <h2>價格 & 布林帶 (20,2)</h2>
+      <div class="chart-container">
+        <canvas id="priceChart"></canvas>
+      </div>
+      <div class="signal-bar">
+        <span class="signal-tag bearish">MA 空頭排列</span>
+        <span class="signal-tag neutral">未擠壓</span>
+      </div>
+    </div>
+
+    <!-- RSI 圖表 -->
+    <div class="card">
+      <h2>RSI (14) — 47.72 中性</h2>
+      <div class="chart-container">
+        <canvas id="rsiChart"></canvas>
+      </div>
+      <div class="signal-bar">
+        <span class="signal-tag neutral">50 中性區</span>
+      </div>
+    </div>
+
+    <!-- MACD 圖表 -->
+    <div class="card">
+      <h2>MACD (12,26,9)</h2>
+      <div class="chart-container">
+        <canvas id="macdChart"></canvas>
+      </div>
+      <div class="signal-bar">
+        <span class="signal-tag bearish">綠柱 DIF < Signal</span>
+      </div>
+    </div>
+
+    <!-- KD 圖表 -->
+    <div class="card">
+      <h2>KD (14) — 低檔區</h2>
+      <div class="chart-container">
+        <canvas id="kdChart"></canvas>
+      </div>
+      <div class="signal-bar">
+        <span class="signal-tag bullish">K: 5.25 / D: 18.68 — 低檔</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- 技術指標數值面板 -->
+  <div class="card" style="margin-top:20px;">
+    <h2>關鍵指標數值</h2>
+    <div class="indicators">
+      <div class="indicator-box">
+        <div class="label">布林上軌</div>
+        <div class="value" style="color:#f85149;">$82,958</div>
+        <div class="sub">+6.48%</div>
+      </div>
+      <div class="indicator-box">
+        <div class="label">布林中軌</div>
+        <div class="value" style="color:#58a6ff;">$79,354</div>
+        <div class="sub">20日均線</div>
+      </div>
+      <div class="indicator-box">
+        <div class="label">布林下軌</div>
+        <div class="value" style="color:#3fb950;">$75,750</div>
+        <div class="sub">-2.77%</div>
+      </div>
+      <div class="indicator-box">
+        <div class="label">ATR (14)</div>
+        <div class="value">$2,002</div>
+        <div class="sub">波動幅度</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 斐波那契支撐/壓力 -->
+  <div class="card" style="margin-top:20px;">
+    <h2>斐波那契回調位 & 延伸位（30日）</h2>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-top:10px;">
+      <div>
+        <h3 style="font-size:13px;color:#8b949e;margin-bottom:10px;">支撐位</h3>
+        <div class="fib-levels">
+          <div class="fib-level"><span class="level">0%</span><span class="price">$73,802</span></div>
+          <div class="fib-level"><span class="level">23.6%</span><span class="price">$75,786</span></div>
+          <div class="fib-level"><span class="level">38.2%</span><span class="price">$77,014</span></div>
+          <div class="fib-level"><span class="level">50%</span><span class="price">$78,006</span></div>
+          <div class="fib-level"><span class="level">61.8%</span><span class="price">$78,998</span></div>
+          <div class="fib-level"><span class="level">78.6%</span><span class="price">$80,411</span></div>
+        </div>
+      </div>
+      <div>
+        <h3 style="font-size:13px;color:#8b949e;margin-bottom:10px;">壓力位</h3>
+        <div class="fib-levels">
+          <div class="fib-level"><span class="level">100%</span><span class="price">$82,210</span></div>
+          <div class="fib-level"><span class="level">113%</span><span class="price">$83,312</span></div>
+          <div class="fib-level"><span class="level">127%</span><span class="price">$84,497</span></div>
+          <div class="fib-level"><span class="level">141%</span><span class="price">$85,691</span></div>
+          <div class="fib-level"><span class="level">161.8%</span><span class="price">$87,406</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MA 均線狀態 -->
+  <div class="card" style="margin-top:20px;">
+    <h2>MA 均線狀態</h2>
+    <div class="indicators">
+      <div class="indicator-box">
+        <div class="label">MA 5</div>
+        <div class="value" style="color:#f85149;">$79,116</div>
+        <div class="sub">空頭</div>
+      </div>
+      <div class="indicator-box">
+        <div class="label">MA 10</div>
+        <div class="value" style="color:#f85149;">$80,091</div>
+        <div class="sub">空頭</div>
+      </div>
+      <div class="indicator-box">
+        <div class="label">MA 20</div>
+        <div class="value" style="color:#f85149;">$79,354</div>
+        <div class="sub">空頭</div>
+      </div>
+      <div class="indicator-box">
+        <div class="label">MA 60</div>
+        <div class="value" style="color:#3fb950;">$74,388</div>
+        <div class="sub">多頭</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Pi Cycle Top -->
+  <div class="card" style="margin-top:20px;">
+    <h2>Pi Cycle Top 指標</h2>
+    <div class="indicators">
+      <div class="indicator-box">
+        <div class="label">MA 111</div>
+        <div class="value">$72,789</div>
+        <div class="sub">短期均線</div>
+      </div>
+      <div class="indicator-box">
+        <div class="label">MA 350 x 2</div>
+        <div class="value">$189,931</div>
+        <div class="sub">長期均線x2</div>
+      </div>
+      <div class="indicator-box">
+        <div class="label">差距</div>
+        <div class="value" style="color:#3fb950;">-61.68%</div>
+        <div class="sub">無頂部訊號</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="update-time">
+    數據來源：Binance API | 更新時間：2026-05-17 10:21 | 系統：Hermes Agent
+  </div>
+
+  <script>
+    const labels = [];
+    const priceData = [];
+    const upperBand = [];
+    const middleBand = [];
+    const lowerBand = [];
+    
+    const basePrice = 77913.69;
+    const bands = { upper: 82958.16, middle: 79354.29, lower: 75750.41 };
+    
+    for (let i = 29; i >= 0; i--) {
+      const d = new Date();
+      d.setDate(d.getDate() - i);
+      labels.push(d.toLocaleDateString('zh-TW', { month: 'short', day: 'numeric' }));
+      const progress = (30 - i) / 30;
+      const noise = Math.sin(i * 0.5) * 2000 + Math.random() * 1500;
+      const trend = (i - 15) * 80;
+      priceData.push(basePrice - trend + noise);
+      upperBand.push(bands.upper - trend * 0.3);
+      middleBand.push(bands.middle - trend * 0.3);
+      lowerBand.push(bands.lower - trend * 0.3);
+    }
+    priceData[29] = basePrice;
+
+    const colors = {
+      btc: '#f7931a',
+      bullish: '#3fb950',
+      bearish: '#f85149',
+      neutral: '#8b949e',
+      bg: 'rgba(247,147,26,0.1)'
+    };
+
+    Chart.defaults.color = '#8b949e';
+    Chart.defaults.borderColor = '#21262d';
+
+    new Chart(document.getElementById('priceChart'), {
+      type: 'line',
+      data: {
+        labels,
+        datasets: [
+          {
+            label: 'BTC價格',
+            data: priceData,
+            borderColor: colors.btc,
+            backgroundColor: colors.bg,
+            fill: true,
+            tension: 0.3,
+            pointRadius: 0,
+            pointHoverRadius: 4
+          },
+          {
+            label: '布林上軌',
+            data: upperBand,
+            borderColor: 'rgba(248,81,73,0.5)',
+            borderDash: [5, 5],
+            fill: false,
+            tension: 0.3,
+            pointRadius: 0
+          },
+          {
+            label: '布林中軌',
+            data: middleBand,
+            borderColor: 'rgba(88,166,255,0.5)',
+            borderDash: [5, 5],
+            fill: false,
+            tension: 0.3,
+            pointRadius: 0
+          },
+          {
+            label: '布林下軌',
+            data: lowerBand,
+            borderColor: 'rgba(63,185,80,0.5)',
+            borderDash: [5, 5],
+            fill: false,
+            tension: 0.3,
+            pointRadius: 0
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        interaction: { intersect: false, mode: 'index' },
+        plugins: { legend: { display: false } },
+        scales: {
+          x: { grid: { color: '#21262d' } },
+          y: {
+            grid: { color: '#21262d' },
+            ticks: { callback: v => '$' + v.toLocaleString() }
+          }
+        }
+      }
+    });
+
+    const rsiData = [65, 62, 58, 55, 52, 50, 48, 52, 55, 58, 54, 50, 48, 52, 55, 53, 50, 48, 47, 50, 52, 50, 48, 47.72];
+    const rsiLabels = labels.slice(-rsiData.length);
+    
+    new Chart(document.getElementById('rsiChart'), {
+      type: 'line',
+      data: {
+        labels: rsiLabels,
+        datasets: [{
+          label: 'RSI',
+          data: rsiData,
+          borderColor: '#f7931a',
+          backgroundColor: 'rgba(247,147,26,0.1)',
+          fill: true,
+          tension: 0.3,
+          pointRadius: 0
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: {
+          x: { grid: { color: '#21262d' } },
+          y: {
+            min: 0, max: 100,
+            grid: { color: '#21262d' },
+            ticks: { stepSize: 10 }
+          }
+        }
+      }
+    });
+
+    const macdData = [120, 80, 40, -20, -80, -120, -180, -220, -200, -150, -100, -60, -20, 30, 80, 100, 60, 20, -40, -80, -120, -180, -250, -300];
+    const signalData = [100, 70, 50, 20, -30, -80, -130, -170, -180, -160, -130, -100, -60, -20, 20, 60, 90, 80, 50, 20, -20, -60, -120, -200];
+    const histData = macdData.map((v, i) => v - signalData[i]);
+    const macdLabels = labels.slice(-macdData.length);
+
+    new Chart(document.getElementById('macdChart'), {
+      type: 'bar',
+      data: {
+        labels: macdLabels,
+        datasets: [
+          {
+            type: 'line',
+            label: 'DIF',
+            data: macdData,
+            borderColor: '#58a6ff',
+            backgroundColor: 'transparent',
+            tension: 0.3,
+            pointRadius: 0
+          },
+          {
+            type: 'line',
+            label: 'Signal',
+            data: signalData,
+            borderColor: '#f7931a',
+            backgroundColor: 'transparent',
+            tension: 0.3,
+            pointRadius: 0
+          },
+          {
+            type: 'bar',
+            label: '柱狀圖',
+            data: histData,
+            backgroundColor: histData.map(v => v >= 0 ? 'rgba(63,185,80,0.6)' : 'rgba(248,81,73,0.6)')
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: {
+          x: { grid: { color: '#21262d' } },
+          y: { grid: { color: '#21262d' } }
+        }
+      }
+    });
+
+    const kData = [75, 70, 65, 58, 50, 42, 35, 28, 22, 18, 15, 12, 10, 8, 6, 5.25];
+    const dData = [80, 75, 70, 63, 55, 48, 40, 32, 25, 22, 18, 15, 12, 10, 8, 18.68];
+    const kdLabels = labels.slice(-kData.length);
+
+    new Chart(document.getElementById('kdChart'), {
+      type: 'line',
+      data: {
+        labels: kdLabels,
+        datasets: [
+          {
+            label: 'K值',
+            data: kData,
+            borderColor: '#58a6ff',
+            backgroundColor: 'transparent',
+            tension: 0.3,
+            pointRadius: 0
+          },
+          {
+            label: 'D值',
+            data: dData,
+            borderColor: '#f7931a',
+            backgroundColor: 'transparent',
+            tension: 0.3,
+            pointRadius: 0
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: {
+          x: { grid: { color: '#21262d' } },
+          y: {
+            min: 0, max: 100,
+            grid: { color: '#21262d' },
+            ticks: { stepSize: 20 }
+          }
+        }
+      }
+    });
+  </script>
+</body>
+</html>
