@@ -142,6 +142,8 @@
       background: rgba(247,147,26,0.15);
       color: #f7931a;
     }
+    .card h2 .badge.bullish-badge { background: rgba(63,185,80,0.15); color: #3fb950; }
+    .card h2 .badge.bearish-badge { background: rgba(248,81,73,0.15); color: #f85149; }
     .chart-container { position: relative; height: 280px; }
     
     /* Indicators */
@@ -726,7 +728,9 @@ async function fetchData() {
     // Update badges
     document.getElementById('chartBadge').textContent = currentSymbol;
     document.getElementById('rsiBadge').textContent = lastRSI.toFixed(1);
-    document.getElementById('macdBadge').textContent = lastMacdHist >= 0 ? '紅柱' : '綠柱';
+    // MACD convention: positive hist = 綠柱 (bullish/多), negative hist = 紅柱 (bearish/空)
+    document.getElementById('macdBadge').textContent = lastMacdHist >= 0 ? '🟢 柱' : '🔴 柱';
+    document.getElementById('macdBadge').className = 'badge ' + (lastMacdHist >= 0 ? 'bullish-badge' : 'bearish-badge');
     document.getElementById('kdBadge').textContent = `K:${lastK.toFixed(1)} D:${lastD.toFixed(1)}`;
 
   } catch (err) {
@@ -867,7 +871,8 @@ function updateSignals(bb, rsi, macdHist, k, d, closes, ma5, ma10, ma20, ma60) {
 
   // MACD signals
   const macdSignal = document.getElementById('macdSignal');
-  macdSignal.innerHTML = `<span class="signal-tag ${macdHist >= 0 ? 'bullish' : 'bearish'}">${macdHist >= 0 ? '紅柱 (多)' : '綠柱 (空)'}</span>`;
+  // MACD convention: positive hist = 🟢 綠柱 (bullish), negative hist = 🔴 紅柱 (bearish)
+  macdSignal.innerHTML = `<span class="signal-tag ${macdHist >= 0 ? 'bullish' : 'bearish'}">${macdHist >= 0 ? '🟢 綠柱 (多)' : '🔴 紅柱 (空)'}</span>`;
 
   // KD signals
   const kdSignal = document.getElementById('kdSignal');
