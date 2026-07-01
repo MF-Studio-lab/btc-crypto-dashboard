@@ -3,7 +3,7 @@ function switchTab(tab) {
   document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
   document.querySelectorAll('.page-section').forEach(p => p.classList.remove('active'));
   if (tab === 'market') {
-    document.getElementById('marketTab').classList.add选派('active');
+    document.getElementById('marketTab').classList.add('active');
     document.getElementById('market-page').classList.add('active');
   } else {
     document.getElementById('strategyTab').classList.add('active');
