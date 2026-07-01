@@ -297,7 +297,6 @@
       .current-price { font-size: 28px; }
     }
   </style>
-  <link rel="stylesheet" href="strategy.css">
 </head>
 <body>
 
@@ -337,15 +336,6 @@
       </button>
     </div>
   </div>
-
-  <!-- Page Tabs -->
-  <div class="tabs">
-    <button class="tab-btn active" id="marketTab" onclick="switchTab('market')">📊 Market</button>
-    <button class="tab-btn" id="strategyTab" onclick="switchTab('strategy')">📋 Strategy</button>
-  </div>
-
-  <!-- Market Page -->
-  <div id="market-page" class="page-section active">
 
   <div class="price-header">
     <div>
@@ -463,126 +453,6 @@
     <div class="loading-text">正在獲取行情數據...</div>
   </div>
 
-  </div><!-- end market-page -->
-
-  <!-- STRATEGY PAGE -->
-  <div id="strategy-page" class="page-section">
-    <!-- Strategy Mode Toggle -->
-    <div class="strategy-mode-toggle" style="margin-bottom:20px;">
-      <button class="strategy-mode-btn active" id="mode-spot" onclick="switchStrategyMode('spot')">現貨</button>
-      <button class="strategy-mode-btn" id="mode-futures" onclick="switchStrategyMode('futures')">合約</button>
-    </div>
-    <div id="strategy-content">
-    <div class="strategy-grid">
-      <!-- Left Column: Trading Plan -->
-      <div class="strategy-card">
-        <h2>📋 交易計畫 (Trading Plan)</h2>
-
-        <h3>進場條件 (Entry Conditions)</h3>
-        <ul class="checklist" id="entryChecklist">
-          <li><input type="checkbox" id="e1"Other onchange="updateChecklist(this)"><label for="e1"> 趨勢確認 (Trend Confirmed)</label></li>
-          <li><input type="checkbox" id="e2" onchange="updateChecklist(this)"><label for="e2"> 支撐/壓力位確認 (S/R Confirmed)</label></li>
-          <li><input type="checkbox" id="e3" onchange="updateChecklist(this)"><label for="e3"> 技術指標訊號 (Indicator Signal)</label></li>
-          <li><input type="checkbox" id="e4" onchange="updateChecklist(this)"><label for="e4"> 成交量確認 (Volume Confirmed)</label></li>
-          <li><input type="checkbox" id="e5" onchange="updateChecklist(this)"><label for="e5"> 時間框架一致 (TF Alignment)</label></li>
-        </ul>
-
-        <h3 style="margin-top:20px;">💰 風險控制 (Risk Management)</h3>
-        <div class="form-row">
-          <div class="form-group"><label>入場價格 (Entry)</label><input type="number" id="entryPrice" step="0.01" placeholder="0.00"></div>
-          <div class="form-group"><label>倉位大小 (Size)</label><input type="number" id="positionSize" step="0.01" placeholder="0.00"></div>
-        </div>
-        <div class="form-row">
-          <div class="form-group"><label>止損價格 (SL)</label><input type="number" id="stopLoss" step="0.01" placeholder="0.00"></div>
-          <div class="form-group"><label>止盈目標 (TP)</label><input type="number" id="takeProfit" step="0.01" placeholder="0.00"></div>
-        </div>
-        <div class="form-group"><label>風險報酬比 (R:R)</label><input type="text" id="rrRatio" readonly placeholder="自動計算" style="background:#21262d;"></div>
-
-        <!-- Futures-only fields -->
-        <div class="futures-only">
-          <h3 style="margin-top:20px;">⚡ 合約參數 (Futures Only)</h3>
-          <div class="form-row">
-            <div class="form-group"><label>槓桿倍數 (Leverage)</label><input type="number" id="leverage" step="1" placeholder="例如: 20"></div>
-            <div class="form-group"><label>保證金 (Margin)</label><input type="number" id="margin" step="0.01" placeholder="USDT"></div>
-          </div>
-          <div class="form-row">
-            <div class="form-group"><label>網格下限 (Grid Lower)</label><input type="number" id="gridLower" step="0.01" placeholder="0.00"></div>
-            <div class="form-group"><label>網格上限 (Grid Upper)</label><input type="number" id="gridUpper" step="0.01" placeholder="0.00"></div>
-          </div>
-          <div class="form-group"><label>網格數量 (Grid Count)</label><input type="number" id="gridCount" step="1" placeholder="例如: 50"></div>
-        </div>
-
-        <h3 style="margin-top:20px;">退出條件 (Exit Conditions)</h3>
-        <ul class="checklist" id="exitChecklist">
-          <li><input type="checkbox" id="x1" onchange="updateChecklist(this)"><label for="x1"> 達到止盈目標 (TP Hit)</label></li>
-          <li><input type="checkbox" id="x2" onchange="updateChecklist(this)"><label for="x2"> 觸發止損 (SL Hit)</label></li>
-          <li><input type="checkbox" id="x3" onchange="updateChecklist(this)"><label for="x3"> 訊號反轉 (Signal Reversal)</label></li>
-          <li><input type="checkbox" id="x4" onchange="updateChecklist(this)"><label for="x4"> 時間止損 (Time Stop)</label></li>
-        </ul>
-
-        <h3 style="margin-top:20px;">📝 策略備註</h3>
-        <div class="form-group"><textarea id="strategyNote" placeholder="在此記錄當前交易想法、市場觀察或策略調整..."></textarea></div>
-        <div style="display:flex;gap:10px;margin-top:10px;">
-          <button class="btn btn-primary" onclick="saveStrategyPlan()">💾 儲存計畫</button>
-          <button class="btn btn-secondary" onclick="resetStrategyPlan()">🔄 重置</button>
-        </div>
-      </div>
-
-      <!-- Right Column: Psychology + Stats -->
-      <div>
-        <!-- Psychology Check -->
-        <div class="strategy-card" style="margin-bottom:20px;">
-          <h2>🧠 心理狀態檢查 (Psychology Check)</h2>
-          <p style="font-size:13px;color:#8b949e;margin-bottom:10px;">交易前，確認您的心理狀態：</p>
-          <ul class="checklist" id="psyChecklist">
-            <li><input type="checkbox" id="p1" onchange="updateChecklist(this)"><label for="p1"> 我處於冷靜狀態，沒有 FOMO</label></li>
-            <li><input type="checkbox" id="p2" onchange="updateChecklist(this)"><label for="p2"> 我能接受這次交易的虧損</label></li>
-            <li><input type="checkbox" id="p3" onchange="updateChecklist(this)"><label for="p3"> 這是計畫內的交易，非衝動單</label></li>
-            <li><input type="checkbox" id="p4" onchange="updateChecklist(this)"><label for="p4"> 我已設定好止損與止盈</label></li>
-          </ul>
-          <div class="psychology-bar">
-            <h3>情緒狀態</h3>
-            <div class="mood-selector" id="moodSelector">
-              <button class="mood-btn" data-mood="calm" onclick="selectMood(this)">😌 冷靜</button>
-              <button class="mood-btn" data-mood="excited" onclick="selectMood(this)">🤩 興奮</button>
-              <button class="mood-btn" data-mood="anxious" onclick="selectMood(this)">😰 焦慮</button>
-              <button class="mood-btn" data-mood="fear" onclick="selectMood(this)">😱 恐懼</button>
-              <button class="mood-btn" data-mood="greedy" onclick="selectMood(this)">🤑 貪婪</button>
-            </div>
-          </div>
-        </div>
-
-        <!-- Statistics -->
-        <div class="strategy-card" style="margin-bottom:20px;">
-          <h2>📊 交易統計 (Statistics)</h2>
-          <div class="stats-grid">
-            <div class="stat-box"><div class="stat-value" id="totalTrades">0</div><div class="stat-label">總交易</div></div>
-            <div class="stat-box"><div class="stat-value" id="winRate">0%</div><div class="stat-label">勝率</div></div>
-            <div class="stat-box"><div class="stat-value" id="profitFactor">0</div><div class="stat-label">獲利因子</div></div>
-            <div class="stat-box"><div class="stat-value" id="avgRR">0</div><div class="stat-label">平均 R:R</div></div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Review Journal -->
-    <div class="strategy-card" style="margin-top:20px;">
-      <h2>📝 復盤日誌 (Review Journal)</h2>
-      <div style="display:flex;gap:10px;margin-bottom:15px;flex-wrap:wrap;">
-        <button class="btn btn-primary" onclick="addTradeRecord()">+ 新增交易紀錄</button>
-        <button class="btn btn-secondary" onclick="exportJournal()">⬇ 匯出</button>
-        <button class="btn btn-secondary" onclick="clearJournal()">🗑 清空</button>
-      </div>
-      <div style="overflow-x:auto;">
-        <table class="review-table">
-          <thead><tr><th>日期</th><th>類型</th><th>幣種</th><th>方向</th><th>入場</th><th>出場</th><th>結果</th><th>R:R</th><th>情緒</th><th>操作</th></tr></thead>
-          <tbody id="journalBody"><!-- Dynamic --></tbody>
-        </table>
-      </div>
-    </div>
-  </div>
-
-<script src="strategy.js"></script>
 <script>
 // State
 let currentMode = 'spot';
