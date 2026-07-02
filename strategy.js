@@ -161,7 +161,7 @@ function getRecords() {
 }
 
 function renderReviewTable() {
-  const tbody = document.querySelector('#reviewTable tbody');
+  const tbody = document.getElementById('journalBody');
   const records = getRecords();
   if (records.length === 0) {
     tbody.innerHTML = '<tr><td colspan="10" style="text-align:center;color:#8b949e;padding:20px;">尚無交易紀錄</td></tr>';

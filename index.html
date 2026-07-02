@@ -569,7 +569,7 @@
     <div class="strategy-card" style="margin-top:20px;">
       <h2>📝 復盤日誌 (Review Journal)</h2>
       <div style="display:flex;gap:10px;margin-bottom:15px;flex-wrap:wrap;">
-        <button class="btn btn-primary" onclick="addTradeRecord()">+ 新增交易紀錄</button>
+        <button class="btn btn-primary" onclick="openModal('addTradeModal')">+ 新增交易紀錄</button>
         <button class="btn btn-secondary" onclick="exportJournal()">⬇ 匯出</button>
         <button class="btn btn-secondary" onclick="clearJournal()">🗑 清空</button>
       </div>
@@ -579,6 +579,51 @@
           <tbody id="journalBody"><!-- Dynamic --></tbody>
         </table>
       </div>
+    </div>
+  </div>
+
+  <!-- Add Trade Record Modal -->
+  <div id="addTradeModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>新增交易紀錄</h3>
+        <button class="modal-close" onclick="closeModal('addTradeModal')">&times;</button>
+      </div>
+      <div class="form-group"><label>幣種</label><input type="text" id="tradeSymbol" placeholder="例如: BTC"></div>
+      <div class="form-row">
+        <div class="form-group"><label>方向</label>
+          <select id="tradeDirection">
+            <option value="buy">多 (Buy)</option>
+            <option value="sell">空 (Sell)</option>
+          </select>
+        </div>
+        <div class="form-group"><label>結果</label>
+          <select id="tradeResult">
+            <option value="win">獲利</option>
+            <option value="loss">虧損</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>入場價格</label><input type="number" id="tradeEntry" step="0.01" placeholder="0.00"></div>
+        <div class="form-group"><label>出場價格</label><input type="number" id="tradeExit" step="0.01" placeholder="0.00"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>R:R</label><input type="text" id="tradeRR" placeholder="例如: 1:2"></div>
+        <div class="form-group"><label>情緒</label>
+          <select id="tradeMood">
+            <option value="">-</option>
+            <option value="冷靜">冷靜</option>
+            <option value="興奮">興奮</option>
+            <option value="焦慮">焦慮</option>
+            <option value="恐懼">恐懼</option>
+            <option value="貪婪">貪婪</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group"><label>備註</label><textarea id="tradeNotes" placeholder="交易心得..."></textarea></div>
+      <button class="action-btn primary" onclick="addTradeRecord()">儲存</button>
+      <button class="action-btn secondary" onclick="closeModal('addTradeModal')">取消</button>
     </div>
   </div>
 

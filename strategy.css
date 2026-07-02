@@ -271,6 +271,18 @@
   color: #8b949e;
 }
 
+/* Modal Form Elements */
+.modal-content .form-group select {
+  width: 100%;
+  background: #0d1117;
+  border: 1px solid #30363d;
+  border-radius: 6px;
+  padding: 8px 12px;
+  color: #e6edf3;
+  font-size: 13px;
+  box-sizing: border-box;
+}
+
 /* Mode Toggle in Strategy Page */
 .strategy-mode-toggle {
   display: flex;
