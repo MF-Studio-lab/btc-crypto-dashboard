@@ -118,7 +118,7 @@ function openModal(id) {
   modal.classList.add('active');
   // Show/hide futures-only fields based on current mode
   modal.querySelectorAll('.futures-only').forEach(el => {
-    el.style.display = currentMode === 'futures' ? 'block' : 'none';
+    el.style.cssText = 'display: ' + (currentMode === 'futures' ? 'block' : 'none') + ' !important;';
   });
 }
 
