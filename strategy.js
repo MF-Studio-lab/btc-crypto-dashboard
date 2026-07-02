@@ -250,6 +250,19 @@ function clearModalForm() {
   document.getElementById('tradeNotes').value = '';
 }
 
+window.switchTab = switchTab;
+window.switchStrategyMode = switchStrategyMode;
+window.updateChecklist = updateChecklist;
+window.selectMood = selectMood;
+window.saveStrategyPlan = saveStrategyPlan;
+window.resetStrategyPlan = resetStrategyPlan;
+window.addTradeRecord = addTradeRecord;
+window.exportJournal = exportJournal;
+window.clearJournal = clearJournal;
+window.deleteRecord = deleteRecord;
+window.openModal = openModal;
+window.closeModal = closeModal;
+
 // Initialize
 document.addEventListener('DOMContentLoaded', function() {
   switchStrategyMode('spot');
