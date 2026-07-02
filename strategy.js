@@ -1,4 +1,7 @@
 // Strategy Page Functions - Spot/Futures Trading Plan & Review
+(function() {
+'use strict';
+
 let currentMode = 'spot';
 const STRATEGY_KEY = 'btcStrategyData';
 
@@ -251,3 +254,4 @@ function clearModalForm() {
 document.addEventListener('DOMContentLoaded', function() {
   switchStrategyMode('spot');
 });
+})();
