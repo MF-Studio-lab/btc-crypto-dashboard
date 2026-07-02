@@ -622,6 +622,18 @@
         </div>
       </div>
       <div class="form-group"><label>備註</label><textarea id="tradeNotes" placeholder="交易心得..."></textarea></div>
+      <!-- Futures-only fields in Modal -->
+      <div class="futures-only">
+        <div class="form-row">
+          <div class="form-group"><label>槓桿倍數</label><input type="number" id="tradeLeverage" step="1" placeholder="例如: 20"></div>
+          <div class="form-group"><label>保證金</label><input type="number" id="tradeMargin" step="0.01" placeholder="USDT"></div>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label>網格下限</label><input type="number" id="tradeGridLower" step="0.01" placeholder="0.00"></div>
+          <div class="form-group"><label>網格上限</label><input type="number" id="tradeGridUpper" step="0.01" placeholder="0.00"></div>
+        </div>
+        <div class="form-group"><label>網格數量</label><input type="number" id="tradeGridCount" step="1" placeholder="例如: 50"></div>
+      </div>
       <button class="action-btn primary" onclick="addTradeRecord()">儲存</button>
       <button class="action-btn secondary" onclick="closeModal('addTradeModal')">取消</button>
     </div>

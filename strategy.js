@@ -114,7 +114,12 @@ function calculateRR() {
 }
 
 function openModal(id) {
-  document.getElementById(id).classList.add('active');
+  const modal = document.getElementById(id);
+  modal.classList.add('active');
+  // Show/hide futures-only fields based on current mode
+  modal.querySelectorAll('.futures-only').forEach(el => {
+    el.style.display = currentMode === 'futures' ? 'block' : 'none';
+  });
 }
 
 function closeModal(id) {
@@ -135,7 +140,7 @@ function addTradeRecord() {
     return;
   }
   const records = getRecords();
-  records.push({
+  const record = {
     id: Date.now(),
     date: new Date().toISOString().split('T')[0],
     symbol,
@@ -147,7 +152,16 @@ function addTradeRecord() {
     mood,
     notes,
     mode: currentMode
-  });
+  };
+  // Futures-specific fields
+  if (currentMode === 'futures') {
+    record.leverage = document.getElementById('tradeLeverage')?.value || '';
+    record.margin = document.getElementById('tradeMargin')?.value || '';
+    record.gridLower = document.getElementById('tradeGridLower')?.value || '';
+    record.gridUpper = document.getElementById('tradeGridUpper')?.value || '';
+    record.gridCount = document.getElementById('tradeGridCount')?.value || '';
+  }
+  records.push(record);
   localStorage.setItem(STRATEGY_KEY + '_' + currentMode + '_records', JSON.stringify(records));
   renderReviewTable();
   closeModal('addTradeModal');
@@ -242,12 +256,10 @@ function clearJournal() {
 }
 
 function clearModalForm() {
-  document.getElementById('tradeSymbol').value = '';
-  document.getElementById('tradeEntry').value = '';
-  document.getElementById('tradeExit').value = '';
-  document.getElementById('tradeRR').value = '';
-  document.getElementById('tradeMood').value = '';
-  document.getElementById('tradeNotes').value = '';
+  ['tradeSymbol','tradeEntry','tradeExit','tradeRR','tradeMood','tradeNotes','tradeLeverage','tradeMargin','tradeGridLower','tradeGridUpper','tradeGridCount'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = '';
+  });
 }
 
 window.switchTab = switchTab;
