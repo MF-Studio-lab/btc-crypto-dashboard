@@ -190,7 +190,7 @@ function renderReviewTable() {
       '<td>' + r.date + '</td>' +
       '<td><span class="order-type-tag ' + modeClass + '">' + modeLabel + '</span></td>' +
       '<td>' + r.symbol + '</td>' +
-      '<td><span class="tag ' + r.direction + '">' + (r.direction === 'buy' ? '多' : '空') + '</span></td>' +
+      '<td><span class="tag ' + r.direction + '">' + (r.direction === 'buy' ? '多' : r.direction === 'sell' ? '空' : '中性') + '</span></td>' +
       '<td>$' + r.entry.toFixed(2) + '</td>' +
       '<td>$' + r.exit.toFixed(2) + '</td>' +
       '<td><span class="tag ' + (isWin ? 'win' : 'loss') + '">' + (isWin ? '獲利' : '虧損') + ' ' + pnl + '%</span></td>' +
